@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room Switching Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 600px;
+        }
+        .url-display {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin: 10px 0;
+            word-break: break-all;
+        }
+        .room-buttons {
+            margin: 20px 0;
+        }
+        .room-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .room-btn:hover {
+            background: #0056b3;
+        }
+        .instructions {
+            background: #e9f7fe;
+            padding: 15px;
+            border-left: 4px solid #007bff;
+            margin: 20px 0;
+        }
+        .log {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Room Switching Test</h1>
+        
+        <div class="instructions">
+            <h3>How to test:</h3>
+            <ol>
+                <li>Click the room buttons below to switch rooms</li>
+                <li>OR manually edit the URL hash (e.g., add <code>#my-test-room</code>)</li>
+                <li>Watch the logs to see room switching events</li>
+                <li>Each room switch should trigger cleanup and reinitialize</li>
+            </ol>
+        </div>
+        
+        <div>
+            <strong>Current URL:</strong>
+            <div class="url-display" id="current-url"></div>
+        </div>
+        
+        <div class="room-buttons">
+            <h3>Quick Room Switch:</h3>
+            <button class="room-btn" onclick="switchToRoom('')">🏠 Home (no room)</button>
+            <button class="room-btn" onclick="switchToRoom('test-room-1')">🔴 Test Room 1</button>
+            <button class="room-btn" onclick="switchToRoom('test-room-2')">🔵 Test Room 2</button>
+            <button class="room-btn" onclick="switchToRoom('happy-blue-cat')">😺 Happy Blue Cat</button>
+            <button class="room-btn" onclick="switchToRoom('pink-fuzzy-bunny')">🐰 Pink Fuzzy Bunny</button>
+        </div>
+        
+        <div>
+            <h3>Event Log:</h3>
+            <div class="log" id="event-log"></div>
+            <button onclick="clearLog()" style="margin-top: 10px;">Clear Log</button>
+        </div>
+    </div>
+
+    <script>
+        let logCount = 0;
+        
+        function updateCurrentUrl() {
+            document.getElementById('current-url').textContent = window.location.href;
+        }
+        
+        function log(message) {
+            const logEl = document.getElementById('event-log');
+            const timestamp = new Date().toLocaleTimeString();
+            logCount++;
+            logEl.textContent += `[${logCount}] ${timestamp}: ${message}\n`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+        
+        function clearLog() {
+            document.getElementById('event-log').textContent = '';
+            logCount = 0;
+        }
+        
+        function switchToRoom(roomId) {
+            const newHash = roomId ? `#${roomId}` : '';
+            log(`Switching to room: "${roomId}" (${newHash || 'root'})`);
+            window.location.hash = newHash;
+        }
+        
+        // Listen for hash changes
+        window.addEventListener('hashchange', () => {
+            const hash = window.location.hash;
+            const roomId = hash ? hash.substring(1) : '';
+            log(`Hash changed: "${hash}" -> Room: "${roomId}"`);
+            updateCurrentUrl();
+        });
+        
+        // Listen for room change events from the app
+        window.addEventListener('roomChanged', (event) => {
+            log(`Room change event fired: ${JSON.stringify(event.detail)}`);
+        });
+        
+        // Initial setup
+        updateCurrentUrl();
+        log('Test page loaded');
+        log(`Initial hash: "${window.location.hash}"`);
+        
+        // Test if we can detect when app components load
+        setTimeout(() => {
+            if (window.app) {
+                log('✅ HalfwayApp detected');
+            } else {
+                log('❌ HalfwayApp not found - this is just a test page');
+            }
+        }, 2000);
+    </script>
+</body>
+</html>

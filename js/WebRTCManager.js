@@ -462,4 +462,30 @@ class WebRTCManager {
             });
         }
     }
+
+    cleanup() {
+        console.log('WebRTC: Cleaning up connections...');
+        
+        // Notify that we're leaving
+        this.notifyUserLeaving();
+        
+        // Close all peer connections
+        this.connections.forEach((conn, peerId) => {
+            try {
+                conn.close();
+            } catch (error) {
+                console.warn('Error closing connection to', peerId, error);
+            }
+        });
+        this.connections.clear();
+        this.roomPeers.clear();
+        
+        // Destroy the peer connection
+        if (this.peer && !this.peer.destroyed) {
+            this.peer.destroy();
+        }
+        this.peer = null;
+        
+        console.log('WebRTC: Cleanup complete');
+    }
 }

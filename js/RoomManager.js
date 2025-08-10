@@ -30,27 +30,29 @@ class RoomManager {
     }
 
     getRoomIdFromUrl() {
-        const path = window.location.pathname;
-        console.log('RoomManager: Extracting room ID from path:', path);
+        const hash = window.location.hash;
+        console.log('RoomManager: Extracting room ID from hash:', hash);
         
-        if (path === '/' || path === '') return null;
+        if (!hash || hash === '#') return null;
         
-        const match = path.match(/\/([^\/]+)$/);
-        if (match) {
-            const roomId = match[1];
-            
-            // Filter out invalid room IDs
-            const invalidIds = ['index.html', 'index.htm', 'app.js', 'styles.css', 'js', 'css'];
-            if (invalidIds.includes(roomId.toLowerCase()) || roomId.includes('.')) {
-                console.log('RoomManager: Invalid room ID detected:', roomId, 'generating new one');
-                return null;
-            }
-            
-            console.log('RoomManager: Valid room ID extracted:', roomId);
-            return roomId;
+        // Remove the # symbol and get the room ID
+        const roomId = hash.substring(1);
+        
+        // Filter out invalid room IDs
+        const invalidIds = ['index.html', 'index.htm', 'app.js', 'styles.css', 'js', 'css'];
+        if (invalidIds.includes(roomId.toLowerCase()) || roomId.includes('.') || roomId.includes('/')) {
+            console.log('RoomManager: Invalid room ID detected:', roomId, 'generating new one');
+            return null;
         }
         
-        return null;
+        // Validate room ID format (letters, numbers, hyphens only)
+        if (!/^[a-zA-Z0-9-]+$/.test(roomId)) {
+            console.log('RoomManager: Invalid room ID format:', roomId, 'generating new one');
+            return null;
+        }
+        
+        console.log('RoomManager: Valid room ID extracted:', roomId);
+        return roomId;
     }
 
     generateRoomId() {
@@ -66,23 +68,23 @@ class RoomManager {
     }
 
     updateUrlWithRoomId() {
-        const currentPath = window.location.pathname;
-        const expectedPath = `/${this.roomId}`;
+        const currentHash = window.location.hash;
+        const expectedHash = `#${this.roomId}`;
         
         // Only update URL if it's different from what we expect
-        if (currentPath !== expectedPath) {
-            const newUrl = `${window.location.origin}/${this.roomId}`;
-            console.log('RoomManager: Updating URL from', currentPath, 'to', expectedPath);
+        if (currentHash !== expectedHash) {
+            const newUrl = `${window.location.origin}${window.location.pathname}#${this.roomId}`;
+            console.log('RoomManager: Updating URL from', currentHash, 'to', expectedHash);
             window.history.replaceState({}, '', newUrl);
         } else {
-            console.log('RoomManager: URL already correct:', currentPath);
+            console.log('RoomManager: URL already correct:', currentHash);
         }
     }
 
     updateRoomUrlDisplay() {
         const roomUrlElement = document.getElementById('room-url');
         if (roomUrlElement) {
-            roomUrlElement.textContent = `halfway.ing/${this.roomId}`;
+            roomUrlElement.textContent = `halfway.ing/#${this.roomId}`;
         }
     }
 
@@ -103,7 +105,7 @@ class RoomManager {
     }
 
     copyRoomUrl() {
-        const url = `${window.location.origin}/${this.roomId}`;
+        const url = `${window.location.origin}/#${this.roomId}`;
         return navigator.clipboard.writeText(url);
     }
 

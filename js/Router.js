@@ -4,6 +4,11 @@ class Router {
     }
 
     setupRouting() {
+        // Handle hash changes (for room navigation)
+        window.addEventListener('hashchange', () => {
+            this.handleRoute();
+        });
+        
         // Handle browser back/forward buttons
         window.addEventListener('popstate', () => {
             this.handleRoute();
@@ -14,12 +19,17 @@ class Router {
     }
 
     handleRoute() {
-        const path = window.location.pathname;
-        console.log('Router: Current path:', path);
+        const hash = window.location.hash;
+        console.log('Router: Current hash:', hash);
         
-        // Always show the app - no 404s in SPA
-        // Let RoomManager extract the room ID from the current URL
+        // Always show the app - hash routing works with static hosts
         this.showApp();
+        
+        // Dispatch room change event for other components to handle
+        const roomId = hash ? hash.substring(1) : null;
+        window.dispatchEvent(new CustomEvent('roomChanged', { 
+            detail: { roomId, hash } 
+        }));
     }
 
     showApp() {
@@ -30,9 +40,13 @@ class Router {
         }
     }
 
-    // Method to programmatically navigate (if needed)
-    navigateTo(path) {
-        window.history.pushState({}, '', path);
+    // Method to programmatically navigate to a room
+    navigateToRoom(roomId) {
+        if (roomId) {
+            window.location.hash = roomId;
+        } else {
+            window.location.hash = '';
+        }
         this.handleRoute();
     }
 }

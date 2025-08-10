@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Halfway.ing - Find Your Midpoint</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app">
+        <header class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <h1 class="logo">Halfway.ing</h1>
+                    <div class="room-info">
+                        <span class="room-title" id="room-title-display">Room</span>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="connection-status">
+                        <span class="status-icon">📶</span>
+                        <span class="status-text">Connected</span>
+                    </div>
+                    <div class="participants-count">
+                        <span class="participants-icon">👥</span>
+                        <span class="participants-text" id="participants-count">1 connected</span>
+                    </div>
+                    <button class="share-btn" id="copy-url" aria-label="Share room">
+                        <span class="share-icon">🔗</span>
+                        <span class="share-text">Share Link</span>
+                    </button>
+                    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+                        <span class="theme-icon">🌙</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="main">
+            <div class="input-section">
+                <div class="input-row">
+                    <div class="name-input-container">
+                        <label class="input-label">Your Name</label>
+                        <input type="text" class="name-input" id="current-user-name" 
+                               placeholder="Anonymous-User123" aria-label="Your name">
+                    </div>
+                    <div class="location-input-container">
+                        <label class="input-label">Location</label>
+                        <div class="location-input-wrapper">
+                            <input type="text" class="location-input" placeholder="Search for an address or place" 
+                                   aria-label="Enter address">
+                            <button class="location-btn" id="current-location-btn">
+                                📍 Use My Location
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="map-container">
+                <div id="map" class="map"></div>
+            </div>
+
+            <div class="participants-section">
+                <div class="participants-header">
+                    <h2>Participants (<span id="participants-number">0</span>)</h2>
+                    <button class="expand-toggle" id="participants-toggle">
+                        <span class="expand-icon">🔽</span>
+                    </button>
+                </div>
+                <div class="participants-list" id="participants-list">
+                    <p class="participants-empty">No participants yet</p>
+                </div>
+            </div>
+
+            <div class="pois-section">
+                <div class="pois-header">
+                    <h2>Nearby Places (<span id="pois-count">0</span>)</h2>
+                    <button class="expand-toggle" id="pois-toggle">
+                        <span class="expand-icon">🔽</span>
+                    </button>
+                </div>
+                <div class="pois-filters" id="pois-filters" style="display: none;">
+                    <select id="category-filter" class="category-filter">
+                        <option value="">All</option>
+                        <option value="restaurant">Restaurants</option>
+                        <option value="cafe">Cafes</option>
+                        <option value="bar">Bars</option>
+                    </select>
+                    <label class="open-now-filter">
+                        <input type="checkbox" id="open-now-filter">
+                        Open now
+                    </label>
+                </div>
+                <div class="pois-list" id="pois-list">
+                    <p class="pois-empty">Add locations to see nearby places</p>
+                </div>
+            </div>
+        </main>
+
+        <div class="toast-container" id="toast-container"></div>
+    </div>
+
+    <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAyUHqKt9DHK_8ZvD8X-PoQdKcN1MY_zJM&libraries=places&callback=initGoogleMaps" async defer></script>
+    
+    <!-- Application modules -->
+    <script src="js/Router.js"></script>
+    <script src="js/RoomManager.js"></script>
+    <script src="js/UserManager.js"></script>
+    <script src="js/MapsService.js"></script>
+    <script src="js/UIManager.js"></script>
+    <script src="js/WebRTCManager.js"></script>
+    <script src="js/HalfwayApp.js"></script>
+    
+    <!-- Application initialization -->
+    <script>
+        let app;
+        
+        // Emergency routing fallback
+        function handleEmergencyRouting() {
+            const path = window.location.pathname;
+            console.log('Emergency routing check for path:', path);
+            
+            // If we're on a path that looks like a room URL but the page seems broken
+            if (path !== '/' && path !== '' && !window.location.pathname.includes('.')) {
+                console.log('Detected room URL, ensuring app loads properly');
+                
+                // Make sure the app container is visible
+                const appContainer = document.querySelector('.app');
+                if (appContainer) {
+                    appContainer.style.display = 'flex';
+                    console.log('App container made visible');
+                }
+            }
+        }
+        
+        // Initialize the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM loaded, initializing app...');
+            handleEmergencyRouting();
+            
+            app = new HalfwayApp();
+            app.init().catch(error => {
+                console.error('App initialization failed:', error);
+                document.body.innerHTML += `
+                    <div style="position: fixed; top: 10px; left: 10px; background: red; color: white; padding: 10px; z-index: 9999;">
+                        App failed to initialize: ${error.message}
+                    </div>
+                `;
+            });
+        });
+        
+        // Global callback for Google Maps API
+        function initGoogleMaps() {
+            console.log('Google Maps callback triggered');
+            if (app) {
+                app.initGoogleMaps();
+            } else {
+                // If app not ready yet, wait and try again
+                console.log('App not ready, waiting for Google Maps...');
+                setTimeout(() => {
+                    if (app) {
+                        app.initGoogleMaps();
+                    } else {
+                        console.warn('App still not ready after 1 second');
+                    }
+                }, 1000);
+            }
+        }
+        
+        // Debug function to check app state
+        function debugApp() {
+            console.log('=== APP DEBUG ===');
+            console.log('App object:', app);
+            console.log('Room ID:', app?.roomManager?.roomId);
+            console.log('Current User:', app?.userManager?.currentUser);
+            console.log('Peer:', app?.webrtcManager?.peer);
+            console.log('================');
+        }
+        
+        // Make debug function globally available
+        window.debugApp = debugApp;
+    </script>
+</body>
+</html>

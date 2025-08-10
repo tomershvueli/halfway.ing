@@ -1,0 +1,18 @@
+{
+  "name": "halfway-ing",
+  "version": "1.0.0",
+  "description": "Find the halfway point between locations",
+  "main": "index.html",
+  "scripts": {
+    "build": "node build.js",
+    "dev": "node dev-server.js . 8000",
+    "preview": "node dev-server.js dist 8001",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "terser": "^5.24.0"
+  },
+  "keywords": ["location", "maps", "meetup", "halfway"],
+  "author": "",
+  "license": "MIT"
+}

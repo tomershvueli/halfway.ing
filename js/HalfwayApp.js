@@ -120,7 +120,9 @@ class HalfwayApp {
         // Participants toggle
         const participantsToggle = document.getElementById('participants-toggle');
         if (participantsToggle) {
-            participantsToggle.addEventListener('click', () => {
+            participantsToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 this.toggleParticipants();
             });
         }
@@ -128,7 +130,9 @@ class HalfwayApp {
         // POI toggle
         const poisToggle = document.getElementById('pois-toggle');
         if (poisToggle) {
-            poisToggle.addEventListener('click', () => {
+            poisToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 this.togglePOIs();
             });
         }
@@ -223,12 +227,16 @@ class HalfwayApp {
         const participantsList = document.getElementById('participants-list');
         
         if (participantsToggle && participantsList) {
-            participantsToggle.classList.toggle('expanded');
+            const isExpanded = participantsToggle.classList.contains('expanded');
             
-            if (participantsToggle.classList.contains('expanded')) {
-                participantsList.style.display = 'block';
-            } else {
+            if (isExpanded) {
+                // Currently expanded, so collapse
+                participantsToggle.classList.remove('expanded');
                 participantsList.style.display = 'none';
+            } else {
+                // Currently collapsed, so expand
+                participantsToggle.classList.add('expanded');
+                participantsList.style.display = 'block';
             }
         }
     }
@@ -238,12 +246,16 @@ class HalfwayApp {
         const poisList = document.getElementById('pois-list');
         
         if (poisToggle && poisList) {
-            poisToggle.classList.toggle('expanded');
+            const isExpanded = poisToggle.classList.contains('expanded');
             
-            if (poisToggle.classList.contains('expanded')) {
-                poisList.style.display = 'block';
-            } else {
+            if (isExpanded) {
+                // Currently expanded, so collapse
+                poisToggle.classList.remove('expanded');
                 poisList.style.display = 'none';
+            } else {
+                // Currently collapsed, so expand
+                poisToggle.classList.add('expanded');
+                poisList.style.display = 'block';
             }
         }
     }

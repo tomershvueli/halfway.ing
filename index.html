@@ -18,6 +18,10 @@
                     <div class="room-info">
                         <span class="room-title" id="room-title-display">Room</span>
                     </div>
+                    <div class="mobile-user-count" id="mobile-user-count" title="Users in room">
+                        <span class="user-count-icon">👥</span>
+                        <span class="user-count-number" id="mobile-participants-number">0</span>
+                    </div>
                 </div>
                 <div class="header-right">
                     <div class="connection-status">
@@ -40,28 +44,30 @@
         </header>
 
         <main class="main">
-            <div class="input-section">
-                <div class="input-row">
-                    <div class="name-input-container">
-                        <label class="input-label">Your Name</label>
-                        <input type="text" class="name-input" id="current-user-name" 
-                               placeholder="Anonymous-User123" aria-label="Your name">
-                    </div>
-                    <div class="location-input-container">
-                        <label class="input-label">Location</label>
-                        <div class="location-input-wrapper">
-                            <input type="text" class="location-input" placeholder="Search for an address or place" 
-                                   aria-label="Enter address">
-                            <button class="location-btn" id="current-location-btn">
-                                📍 Use My Location
-                            </button>
+            <div class="content-wrapper">
+                <div class="input-section">
+                    <div class="input-row">
+                        <div class="name-input-container">
+                            <label class="input-label">Your Name</label>
+                            <input type="text" class="name-input" id="current-user-name" 
+                                   placeholder="Anonymous-User123" aria-label="Your name">
+                        </div>
+                        <div class="location-input-container">
+                            <label class="input-label">Location</label>
+                            <div class="location-input-wrapper">
+                                <input type="text" class="location-input" placeholder="Search for an address or place" 
+                                       aria-label="Enter address">
+                                <button class="location-btn" id="current-location-btn">
+                                    📍 Use My Location
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="map-container">
-                <div id="map" class="map"></div>
+                <div class="map-container">
+                    <div id="map" class="map"></div>
+                </div>
             </div>
 
             <div class="participants-section">

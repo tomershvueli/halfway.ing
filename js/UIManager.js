@@ -25,6 +25,12 @@ class UIManager {
             participantsNumber.textContent = userCount;
         }
         
+        // Update mobile user count pill
+        const mobileParticipantsNumber = document.getElementById('mobile-participants-number');
+        if (mobileParticipantsNumber) {
+            mobileParticipantsNumber.textContent = userCount;
+        }
+        
         // Update participants list
         if (userCount === 0) {
             participantsList.innerHTML = '<p class="participants-empty">No participants yet</p>';
